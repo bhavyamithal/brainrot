@@ -351,3 +351,79 @@ BrainrotError (base)
 ### Gotcha
 - Importing `from brainrot.config import settings` at module level causes Settings() instantiation which requires env vars
 - Solution: Use lazy import in `_get_default_cache_dir()` helper function
+
+## Wave 1 Task 11: Video Assembly Pipeline (2026-03-15)
+
+### Files Created
+- `brainrot/video/__init__.py` - Package exports
+- `brainrot/video/captions.py` - ASS format subtitle generation
+- `brainrot/video/assembly.py` - FFmpeg-based video builder
+
+### Classes Implemented
+- `CaptionStyle` (dataclass) - Caption appearance configuration
+  - font_family, font_size, color, outline_color, outline_width
+  - position (top/center/bottom), margin_v, alignment
+  - `to_ass_style()` - Convert to ASS style definition string
+- `CaptionLine` (dataclass) - Single caption line with timing
+- `CaptionGenerator` - Generates ASS format subtitles
+  - `generate_ass(text, duration, words_per_line, words_per_second)` - Full ASS content
+  - `generate_ass_to_file(text, duration, output_path)` - Save to disk
+  - `_split_into_lines()`, `_time_lines()`, `_build_ass_file()` - Internal helpers
+- `BackgroundConfig` (dataclass) - Video background settings
+- `AudioConfig` (dataclass) - Audio track configuration
+- `ConcatDemuxer` - FFmpeg concat demuxer file generator
+  - `add_entry(source, duration)` - Add video file entry
+  - `add_color(color, duration)` - Add solid color entry
+  - `build()` - Generate concat file (CRITICAL: repeats last entry)
+  - `cleanup()` - Remove generated file
+- `VideoBuilder` - Main video assembly class
+  - `add_background(source, duration)` - Add footage or color
+  - `add_captions(text, style)` - Add subtitle overlay
+  - `add_audio(audio_path, music_path, music_volume)` - Add audio tracks
+  - `render(output_path, progress_callback)` - Render final video
+  - `_build_ffmpeg_command()` - Construct FFmpeg command
+  - `_execute_ffmpeg()` - Run with progress tracking
+- `check_ffmpeg_available()` - Utility to check FFmpeg installation
+
+### ASS Format Details
+- Color format: `&HAABBGGRR` (alpha, blue, green, red) - NOT typical hex
+- Alignment: Numpad layout (1-9), bottom=2, center=5, top=8
+- Bold: -1 for true, 0 for false
+- Style format: 21 fields in specific order
+
+### FFmpeg Commands Used
+- Scale/crop for vertical: `scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920`
+- Subtitle overlay: `ass='path/to/captions.ass'`
+- Pixel format: `-pix_fmt yuv420p` (compatibility)
+- Audio mix: `amix=inputs=2:duration=first:dropout_transition=2`
+- Web optimization: `-movflags +faststart`
+
+### CRITICAL: FFmpeg Concat Demuxer Bug
+- FFmpeg concat demuxer does NOT honor duration of last entry
+- Workaround: Repeat the last entry in the concat file
+- Example:
+  ```
+  file 'video.mp4'
+  duration 10.0
+  file 'video.mp4'  # Repeated to honor duration
+  ```
+
+### Key Design Decisions
+- Resolution default: 1080x1920 (vertical/TikTok format)
+- H.264 codec with medium preset, CRF 23
+- AAC audio at 192kbps
+- Progress tracking via stderr parsing (Duration/time regex)
+- Temp files cleaned up after render (success or failure)
+- Supports both video files and solid color backgrounds
+- Audio duration auto-detection via ffprobe
+
+### Video Filter Chain
+1. Scale with aspect ratio preservation (increase mode)
+2. Crop to exact resolution
+3. ASS subtitle overlay (if captions provided)
+
+### Notes
+- FFmpeg/ffprobe must be installed on system (not bundled)
+- `check_ffmpeg_available()` utility for runtime verification
+- Subprocess-based execution with stderr parsing for progress
+- Error handling via VideoGenerationError from exceptions module

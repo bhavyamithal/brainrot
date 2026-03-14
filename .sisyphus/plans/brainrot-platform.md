@@ -765,7 +765,7 @@ Max Concurrent: 6 (Wave 1)
 
 ---
 
-- [ ] 11. Video Assembly Pipeline (FFmpeg)
+- [x] 11. Video Assembly Pipeline (FFmpeg)
 
   **What to do**:
   - Create `brainrot/video/assembly.py` with FFmpeg-based video builder
