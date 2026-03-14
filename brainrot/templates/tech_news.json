@@ -1,0 +1,48 @@
+{
+  "name": "tech_news",
+  "display_name": "Tech News",
+  "description": "Dark, futuristic tech news style with cyan accents and bold typography. Perfect for technology updates and news ticker style content.",
+  "version": "1.0.0",
+  "background_style": {
+    "type": "solid",
+    "color": "#1a1a2e",
+    "secondary_color": "#16213e",
+    "gradient_direction": 180,
+    "opacity": 1.0
+  },
+  "caption_style": {
+    "font": "Montserrat Bold",
+    "size": 68,
+    "color": "#FFFFFF",
+    "outline_color": "#00d9ff",
+    "outline_width": 3,
+    "margin_v": 100,
+    "alignment": 2,
+    "bold": true,
+    "italic": false
+  },
+  "transition": {
+    "type": "fade",
+    "duration": 0.3,
+    "easing": "ease-in-out"
+  },
+  "colors": {
+    "primary": "#00d9ff",
+    "secondary": "#0f3460",
+    "background": "#1a1a2e",
+    "text": "#FFFFFF",
+    "text_secondary": "#a0a0a0",
+    "accent": "#00d9ff",
+    "outline": "#00d9ff"
+  },
+  "fonts": {
+    "primary": "Montserrat Bold",
+    "secondary": "Montserrat",
+    "primary_size": 68,
+    "secondary_size": 42,
+    "line_height": 1.3,
+    "letter_spacing": 0.5
+  },
+  "animation_style": "kinetic",
+  "caption_position": "bottom"
+}

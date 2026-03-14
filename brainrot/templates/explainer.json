@@ -1,0 +1,48 @@
+{
+  "name": "explainer",
+  "display_name": "Explainer",
+  "description": "Minimal, educational style with clean typography. Ideal for concept explanations and how-to content. Focuses on readability and clarity.",
+  "version": "1.0.0",
+  "background_style": {
+    "type": "solid",
+    "color": "#FFFFFF",
+    "secondary_color": "#f5f5f5",
+    "gradient_direction": 180,
+    "opacity": 1.0
+  },
+  "caption_style": {
+    "font": "Roboto Medium",
+    "size": 60,
+    "color": "#2d3436",
+    "outline_color": "#0984e3",
+    "outline_width": 2,
+    "margin_v": 80,
+    "alignment": 2,
+    "bold": false,
+    "italic": false
+  },
+  "transition": {
+    "type": "fade",
+    "duration": 0.5,
+    "easing": "ease-in-out"
+  },
+  "colors": {
+    "primary": "#0984e3",
+    "secondary": "#6c5ce7",
+    "background": "#FFFFFF",
+    "text": "#2d3436",
+    "text_secondary": "#636e72",
+    "accent": "#00b894",
+    "outline": "#0984e3"
+  },
+  "fonts": {
+    "primary": "Roboto Medium",
+    "secondary": "Roboto",
+    "primary_size": 60,
+    "secondary_size": 38,
+    "line_height": 1.5,
+    "letter_spacing": 0.0
+  },
+  "animation_style": "static",
+  "caption_position": "bottom"
+}

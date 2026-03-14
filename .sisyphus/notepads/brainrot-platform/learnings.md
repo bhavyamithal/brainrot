@@ -427,3 +427,68 @@ BrainrotError (base)
 - `check_ffmpeg_available()` utility for runtime verification
 - Subprocess-based execution with stderr parsing for progress
 - Error handling via VideoGenerationError from exceptions module
+
+## Wave 1 Task 12: Content Templates Library (2026-03-15)
+
+### Files Created
+- `brainrot/templates/__init__.py` - Package exports
+- `brainrot/templates/renderer.py` - TemplateConfig and TemplateRenderer classes
+- `brainrot/templates/tech_news.json` - Dark tech news style template
+- `brainrot/templates/data_story.json` - Light data visualization template
+- `brainrot/templates/explainer.json` - Clean educational template
+- `brainrot/templates/listicle.json` - Bold countdown style template
+
+### Classes Implemented
+- `BackgroundStyle` (dataclass) - Background configuration
+  - type, color, secondary_color, gradient_direction, opacity
+- `TransitionConfig` (dataclass) - Transition effect settings
+  - type, duration, easing
+- `TypographyConfig` (dataclass) - Font configuration
+  - primary_font, secondary_font, sizes, line_height, letter_spacing
+- `ColorPalette` (dataclass) - Color scheme
+  - primary, secondary, background, text, text_secondary, accent, outline
+- `TemplateConfig` (dataclass) - Complete template definition
+  - name, display_name, description, background, caption, transition, typography, colors
+  - `from_json(path)` - Load from JSON file
+  - `from_dict(data)` - Create from dictionary
+  - `to_content_template()` - Convert to ContentTemplate for type compatibility
+- `TemplateRenderer` - Applies template to VideoBuilder
+  - `load_template(name)` - Load template by name
+  - `get_caption_style()` - Get CaptionStyle for template
+  - `apply_to_builder(builder, script, audio_path, duration)` - Apply styling
+  - `generate_thumbnail(video_path, output_path, timestamp)` - Extract frame via FFmpeg
+  - `get_style_summary()` - Get summary dict of template styling
+
+### Functions
+- `list_templates()` - Returns sorted list of available template names
+- `get_template_path(name)` - Returns Path to template JSON file
+
+### Template Visual Distinctions
+- **tech_news**: Dark (#1a1a2e), cyan accents (#00d9ff), Montserrat Bold, bottom captions, fade
+- **data_story**: Light (#f8f9fa), blue accents (#3498db), Open Sans Bold, center captions, zoom
+- **explainer**: White (#FFFFFF), green accents (#00b894), Roboto Medium, bottom captions, fade
+- **listicle**: Black (#0d0d0d), red accents (#ff6b6b), Bebas Neue, top captions, slide
+
+### Color Format Conversion
+- ASS format uses `&HAABBGGRR` (alpha, blue, green, red)
+- `hex_to_ass()` converts `#RRGGBB` to ASS format
+- Example: `#FFFFFF` → `&H00FFFFFF`
+
+### Key Design Decisions
+- Templates stored as JSON files alongside Python module
+- TemplateConfig dataclass provides structured access to template data
+- TemplateRenderer bridges template config to VideoBuilder method calls
+- Each template must have distinctly different visual branding (per MUST NOT DO)
+- CaptionStyle derived from template caption config + typography + colors
+- Thumbnail generation uses FFmpeg with configurable timestamp
+
+### Integration Points
+- Uses `CaptionStyle` from `brainrot.video.captions`
+- Uses `VideoBuilder` from `brainrot.video.assembly`
+- Uses `Script` and `ContentTemplate` from `brainrot.types`
+- TemplateConfig can convert to ContentTemplate for type compatibility
+
+### Notes
+- Gradient backgrounds currently fall back to solid color (gradient FFmpeg filter work needed)
+- Template directory resolved via `Path(__file__).parent`
+- All 4 templates verified loading with distinct styling

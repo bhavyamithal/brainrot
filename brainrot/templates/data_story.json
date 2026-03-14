@@ -1,0 +1,48 @@
+{
+  "name": "data_story",
+  "display_name": "Data Story",
+  "description": "Clean, professional style optimized for data visualization and charts. Light background with blue accents for educational content.",
+  "version": "1.0.0",
+  "background_style": {
+    "type": "solid",
+    "color": "#f8f9fa",
+    "secondary_color": "#e9ecef",
+    "gradient_direction": 180,
+    "opacity": 1.0
+  },
+  "caption_style": {
+    "font": "Open Sans Bold",
+    "size": 64,
+    "color": "#212529",
+    "outline_color": "#3498db",
+    "outline_width": 2,
+    "margin_v": 90,
+    "alignment": 5,
+    "bold": true,
+    "italic": false
+  },
+  "transition": {
+    "type": "zoom",
+    "duration": 0.4,
+    "easing": "ease-out"
+  },
+  "colors": {
+    "primary": "#3498db",
+    "secondary": "#2c3e50",
+    "background": "#f8f9fa",
+    "text": "#212529",
+    "text_secondary": "#6c757d",
+    "accent": "#e74c3c",
+    "outline": "#3498db"
+  },
+  "fonts": {
+    "primary": "Open Sans Bold",
+    "secondary": "Open Sans",
+    "primary_size": 64,
+    "secondary_size": 40,
+    "line_height": 1.4,
+    "letter_spacing": 0.0
+  },
+  "animation_style": "smooth",
+  "caption_position": "center"
+}

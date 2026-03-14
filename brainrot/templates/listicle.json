@@ -1,0 +1,48 @@
+{
+  "name": "listicle",
+  "display_name": "Listicle Countdown",
+  "description": "Bold countdown style for list-based content. Features prominent numbering and energetic typography. Perfect for top 10 lists and rankings.",
+  "version": "1.0.0",
+  "background_style": {
+    "type": "solid",
+    "color": "#0d0d0d",
+    "secondary_color": "#1a1a1a",
+    "gradient_direction": 135,
+    "opacity": 1.0
+  },
+  "caption_style": {
+    "font": "Bebas Neue",
+    "size": 80,
+    "color": "#FFFFFF",
+    "outline_color": "#ff6b6b",
+    "outline_width": 4,
+    "margin_v": 120,
+    "alignment": 8,
+    "bold": true,
+    "italic": false
+  },
+  "transition": {
+    "type": "slide",
+    "duration": 0.35,
+    "easing": "ease-out"
+  },
+  "colors": {
+    "primary": "#ff6b6b",
+    "secondary": "#feca57",
+    "background": "#0d0d0d",
+    "text": "#FFFFFF",
+    "text_secondary": "#c8c8c8",
+    "accent": "#ff6b6b",
+    "outline": "#ff6b6b"
+  },
+  "fonts": {
+    "primary": "Bebas Neue",
+    "secondary": "Montserrat Bold",
+    "primary_size": 80,
+    "secondary_size": 52,
+    "line_height": 1.1,
+    "letter_spacing": 1.0
+  },
+  "animation_style": "kinetic",
+  "caption_position": "top"
+}
