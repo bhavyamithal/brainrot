@@ -257,3 +257,54 @@ BrainrotError (base)
 - pytrends uses unofficial Google Trends API (may have rate limits)
 - Trend IDs prefixed by source: 'reddit-', 'gt-'
 - Recency bonus formula: `max(0, 1 - age_hours/24) * 0.2`
+
+## Wave 1 Task 8: Script Generator with Templates (2026-03-15)
+
+### Files Created
+- `brainrot/content/__init__.py` - Package exports
+- `brainrot/content/script_generator.py` - Script generation with templates
+- `brainrot/content/templates/` - Directory for future template files
+
+### Classes Implemented
+- `ScriptTemplate` (dataclass) - Template definition
+  - `name`, `system_prompt`, `user_prompt_template`, `min_words`, `max_words`
+  - `format_prompt(**kwargs)` - Fills placeholders with values
+- `ScriptGenerator` - Main generator class
+  - `__init__(llm_client)` - Optional LLM client injection
+  - `generate(trend, template)` - Generate script from trend
+  - `_validate_script(text, min_words, max_words)` - Check length
+  - `_extract_hook(text)` - Get first engaging sentence
+  - `_count_words(text)` - Word counter
+  - `register_template(template)` - Add custom templates
+  - `get_template(name)` - Retrieve template by name
+  - `is_duplicate(trend_id)` - Check history for existing script
+  - `get_history(limit)` - Retrieve recent scripts
+  - `clear_history()` - Reset history
+
+### Default Templates
+- `news_synthesis` - Tech news summary with analysis
+  - System: Engaging tech content creator persona
+  - Placeholders: {title}, {source}, {url}, {keywords}
+  - Constraints: 150-300 words, compelling hook required
+- `explainer` - Concept explanation with examples
+  - System: Simplifier of complex concepts
+  - Placeholders: {title}, {keywords}
+  - Constraints: 150-300 words, analogy-based explanation
+
+### Script History
+- Persisted to `cache_dir/script_history.json`
+- Tracks all generated scripts with full metadata
+- Prevents duplicate content generation
+- `is_duplicate()` checks before generating
+
+### Key Design Decisions
+- Lazy LLM client initialization (creates on first use if not provided)
+- Template validation with word count bounds (150-300 for 30-second videos)
+- Hook extraction using regex sentence splitting (first sentence, max 150 chars)
+- Auto-adjustment attempt via LLM regeneration if validation fails
+- Trend can be passed as Trend object or dict for flexibility
+
+### Notes
+- Templates use Python format strings with named placeholders
+- Word count validation is strict - raises ValueError on failure
+- History stores full Script model data for reconstruction

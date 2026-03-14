@@ -590,7 +590,7 @@ Max Concurrent: 6 (Wave 1)
 
 ---
 
-- [ ] 8. Script Generator with Templates
+- [x] 8. Script Generator with Templates
 
   **What to do**:
   - Create `brainrot/content/script_generator.py`
