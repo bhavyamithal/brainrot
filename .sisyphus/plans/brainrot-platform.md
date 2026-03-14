@@ -530,7 +530,7 @@ Max Concurrent: 6 (Wave 1)
 
 ---
 
-- [ ] 7. Trend Detection Engine
+- [x] 7. Trend Detection Engine
 
   **What to do**:
   - Create `brainrot/trends/` package with multiple source implementations
@@ -711,7 +711,7 @@ Max Concurrent: 6 (Wave 1)
 
 ---
 
-- [ ] 10. Stock Footage/Asset Manager
+- [x] 10. Stock Footage/Asset Manager
 
   **What to do**:
   - Create `brainrot/assets/` package for media management

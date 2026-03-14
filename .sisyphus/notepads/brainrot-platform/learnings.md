@@ -149,3 +149,111 @@ BrainrotError (base)
 - Category ID "22" = People & Blogs (default for uploads)
 - Privacy status defaults to "private" for safety
 - Upload uses resumable MediaFileUpload for large files
+
+## Wave 1 Task 10: Stock Footage/Asset Manager (2026-03-15)
+
+### Files Created
+- `brainrot/assets/__init__.py` - Package exports
+- `brainrot/assets/sources/__init__.py` - Sources package exports
+- `brainrot/assets/sources/pexels.py` - Pexels API integration
+- `brainrot/assets/sources/pixabay.py` - Pixabay API integration
+- `brainrot/assets/manager.py` - Unified asset management
+
+### Classes Implemented
+- `PexelsSource` - Free stock video source from Pexels
+  - `search(query, limit, orientation, size)` - Video search
+  - `get_popular(limit)` - Get trending videos
+  - `get_by_id(video_id)` - Get specific video
+- `PixabaySource` - Free stock video/image source from Pixabay
+  - `search(query, limit, video_type, orientation, category)` - Video search
+  - `search_images(query, limit, image_type, orientation)` - Image search
+  - `get_categories()` - Available category filters
+- `AssetManager` - Unified asset management
+  - `search(query, source, limit)` - Search single source
+  - `search_all_sources(query, limit_per_source)` - Search all sources
+  - `download(asset_url, filename)` - Download to cache
+  - `get_cached(asset_id)` - Check cache
+  - `track_usage(asset_id, context)` - Record usage
+  - `get_usage_stats(asset_id)` - Get usage count
+  - `get_unused_assets(assets)` - Filter unused
+  - `get_least_used_assets(assets, max_usage)` - Filter by usage threshold
+- `LocalAssetLibrary` - Custom footage management
+  - `add_asset(file_path, category, tags, mood)` - Add local file
+  - `search(query, category, tags, mood)` - Search local assets
+  - `get_categories()` - List used categories
+  - `get_by_mood(mood)` - Filter by mood
+- `BackgroundMusicLibrary` - Royalty-free music management
+  - `add_track(file_path, title, mood, tempo, duration, source, license_info)` - Add track
+  - `search(mood, tempo, max_duration)` - Search tracks
+  - `get_random_track(mood)` - Get random track
+  - `get_available_moods()` - List moods
+
+### API Keys
+- Pexels: Users need their own key from https://www.pexels.com/api/new/
+- Pixabay: Users need their own key from https://pixabay.com/api/docs/
+- Both use placeholder defaults that need to be replaced for actual API calls
+
+### Data Persistence
+- Usage tracking: `cache_dir/asset_usage.json`
+- Local library metadata: `library_dir/library_metadata.json`
+- Music library: `music_dir/music_library.json`
+
+### License Compatibility
+- Pexels License: Free for commercial use, no attribution required
+- Pixabay License: Free for commercial use, no attribution required
+
+### Notes
+- Both APIs return videos with royalty-free licenses suitable for commercial content
+- Asset IDs prefixed with source name (e.g., 'pexels_123', 'pixabay_456')
+- Video files selected by highest resolution available
+
+## Wave 1 Task 7: Trend Detection Engine (2026-03-15)
+
+### Files Created
+- `brainrot/trends/__init__.py` - Package exports
+- `brainrot/trends/reddit.py` - Reddit API integration via PRAW
+- `brainrot/trends/google_trends.py` - Google Trends integration via pytrends
+- `brainrot/trends/aggregator.py` - Trend aggregation and caching
+
+### Classes Implemented
+- `RedditTrendSource` - Fetches trending posts from Reddit
+  - `__init__(subreddits)` - Configurable subreddit list
+  - `fetch(limit)` - Returns list of Trend objects
+  - Filters: stickied posts, NSFW content, low score (<100)
+  - Default subreddits: technology, programming, artificial, MachineLearning
+- `GoogleTrendsSource` - Fetches trending searches from Google Trends
+  - `__init__(geo)` - Geographic region (default: US)
+  - `fetch(limit)` - Returns daily trending searches
+  - `fetch_related_topics(query, limit)` - Get related topics for a query
+- `TrendAggregator` - Combines trends from multiple sources
+  - `__init__(sources, cache)` - Accepts list of TrendSource implementations
+  - `add_source(source)` - Add source dynamically
+  - `get_trends(limit, fetch_limit, exclude_processed)` - Fetch and aggregate
+  - Deduplicates by title similarity (Jaccard index, threshold 0.7)
+  - Ranks by: score + recency bonus (up to 20% for recent)
+- `TrendCache` - Tracks processed trends to avoid reprocessing
+  - `is_processed(trend_id)` - Check if trend was processed
+  - `mark_processed(trend_id)` - Mark single trend
+  - `mark_many_processed(trend_ids)` - Mark multiple trends
+  - `clear()` - Reset cache
+  - Persists to `cache_dir/trend_cache.json`
+
+### Dependencies Added
+- `pytrends>=4.9.0` - Google Trends API client
+
+### Design Patterns
+- Lazy initialization for API clients (Reddit client created on first fetch)
+- Protocol class for source interface compatibility
+- Graceful degradation: continues to other sources on individual failures
+- Error aggregation: collects errors from all sources before raising
+
+### Filtering Logic
+- Reddit: Skip stickied, NSFW, score < 100
+- Deduplication: Jaccard similarity on word sets (threshold 0.7)
+- Cache: Exclude previously processed trend IDs
+
+### Notes
+- PRAW Reddit client is read-only (no user authentication needed)
+- pytrends uses unofficial Google Trends API (may have rate limits)
+- Trend IDs prefixed by source: 'reddit-', 'gt-'
+- Recency bonus formula: `max(0, 1 - age_hours/24) * 0.2`

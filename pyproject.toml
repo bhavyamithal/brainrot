@@ -31,6 +31,7 @@ dependencies = [
     "ollama>=0.1.0",
     "pytube>=15.0.0",
     "praw>=7.7.0",
+    "pytrends>=4.9.0",
     "google-api-python-client>=2.100.0",
     "google-auth-oauthlib>=1.1.0",
 ]
