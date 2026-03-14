@@ -651,7 +651,7 @@ Max Concurrent: 6 (Wave 1)
 
 ---
 
-- [ ] 9. TTS Integration (Kokoro/Fish Audio)
+- [x] 9. TTS Integration (Kokoro/Fish Audio)
 
   **What to do**:
   - Create `brainrot/audio/tts.py` with TTS abstraction

@@ -308,3 +308,46 @@ BrainrotError (base)
 - Templates use Python format strings with named placeholders
 - Word count validation is strict - raises ValueError on failure
 - History stores full Script model data for reconstruction
+
+## Wave 1 Task 9: TTS Integration (2026-03-15)
+
+### Files Created
+- `brainrot/audio/__init__.py` - Package exports
+- `brainrot/audio/tts.py` - TTS client with edge-tts integration
+
+### Classes Implemented
+- `TTSClient` - Text-to-speech client using edge-tts
+  - `synthesize(text, voice, output_path)` - Generate speech from text
+  - `_synthesize_edge(text, voice)` - edge-tts API call
+  - `_normalize_audio(input_path, output_path)` - FFmpeg loudnorm filter
+  - `_get_cache_key(text, voice)` - MD5 hash for caching
+  - `_get_voice_config(voice)` - Resolve profile name to config
+  - `get_available_voices()` - List supported voice IDs
+  - `get_voice_profiles()` - List predefined profiles
+  - `register_voice_profile(name, config)` - Add custom profile
+  - `clear_cache()` - Remove cached audio files
+
+### Voice Profiles
+- `default` - en-US-AriaNeural, neutral rate/pitch
+- `energetic` - en-US-JennyNeural, +10% rate, +5Hz pitch
+- `calm` - en-US-GuyNeural, -5% rate, -5Hz pitch
+- `professional` - en-GB-SoniaNeural, neutral
+- `casual` - en-AU-NatashaNeural, +5% rate
+
+### Audio Normalization
+- FFmpeg loudnorm filter: `loudnorm=I=-14:TP=-1.5:LRA=11`
+- Target: -14 LUFS (streaming standard)
+- Output: 44.1kHz stereo MP3
+
+### Dependencies Added
+- `edge-tts>=6.1.0` - Microsoft Edge TTS (free, no API key)
+
+### Key Design Decisions
+- Lazy import of `brainrot.config.settings` to avoid triggering Settings validation at module import time
+- Cache stored in `cache_dir/audio/` with MD5 hash filenames
+- Voice profiles support both rate and pitch adjustments
+- asyncio.run() wrapper for edge-tts async API
+
+### Gotcha
+- Importing `from brainrot.config import settings` at module level causes Settings() instantiation which requires env vars
+- Solution: Use lazy import in `_get_default_cache_dir()` helper function
