@@ -409,7 +409,7 @@ Max Concurrent: 6 (Wave 1)
 
 ---
 
-- [ ] 5. YouTube API Client + Quota Tracker
+- [x] 5. YouTube API Client + Quota Tracker
 
   **What to do**:
   - Create `brainrot/youtube_client.py` with YouTube Data API v3 wrapper
@@ -470,7 +470,7 @@ Max Concurrent: 6 (Wave 1)
 
 ---
 
-- [ ] 6. LLM Client Setup (Ollama)
+- [x] 6. LLM Client Setup (Ollama)
 
   **What to do**:
   - Create `brainrot/llm_client.py` with Ollama API wrapper

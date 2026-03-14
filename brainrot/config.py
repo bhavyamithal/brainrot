@@ -4,6 +4,8 @@ This module provides a centralized configuration system that loads settings
 from environment variables and .env files.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 
 from pydantic import Field, field_validator

@@ -87,3 +87,65 @@ BrainrotError (base)
 - Protocols use @runtime_checkable decorator for isinstance checks
 - Follows existing codebase style (from __future__ import annotations)
 
+
+## Wave 1 Task 6: LLM Client Setup (2026-03-15)
+
+### File Created
+- `brainrot/llm_client.py` - Unified LLM client with Ollama/Groq support
+
+### Key Features
+- `LLMClient` class with auto-provider detection
+- Primary: Ollama (local, http://localhost:11434)
+- Fallback: Groq free tier (llama-3.1-8b-instant)
+- `@retry` decorator for transient failures
+- `generate(prompt, model, system, **kwargs)` method
+
+### Default Models
+- Ollama: `llama3.2`
+- Groq: `llama-3.1-8b-instant` (free tier)
+
+### API Patterns
+- Ollama: Uses `ollama.chat()` from ollama package
+- Groq: Uses `requests.post()` to OpenAI-compatible endpoint
+
+### Notes
+- Lazy import of `ollama` package inside `_generate_ollama()` to avoid import errors when only using Groq
+- Provider detection caches result in `_ollama_available` to avoid repeated health checks
+
+## Wave 1 Task 5: YouTube API Client + Quota Tracker (2026-03-15)
+
+### Files Created
+- `brainrot/youtube_client.py` - YouTube Data API v3 client with OAuth and quota management
+
+### Classes Implemented
+- `QuotaManager` - Daily quota tracking with JSON persistence
+  - `record_upload(units)` - Deduct quota units (default 1600)
+  - `remaining_quota()` - Get remaining units
+  - `can_upload(units)` - Check if upload possible
+  - `_reset_if_new_day()` - Auto-reset at midnight UTC
+- `YouTubeClient` - OAuth 2.0 and video operations
+  - `authenticate()` - OAuth flow with credential persistence
+  - `upload_video(video, title, description, tags, category_id, privacy_status)` -> UploadResult
+  - `get_video_analytics(video_id)` -> dict
+  - `get_channel_info()` -> dict
+
+### Quota Constants
+- `DEFAULT_DAILY_QUOTA = 10000` units
+- `UPLOAD_QUOTA_COST = 1600` units
+- `SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]`
+
+### Key Design Decisions
+- Quota persisted to `cache_dir/youtube_quota.json` with date and used_quota
+- Automatic quota reset when date changes (UTC timezone)
+- Credentials saved as JSON with token, refresh_token, client_id, client_secret
+- Resumable uploads with 1MB chunk size
+- QuotaExceededError raised before upload attempt if quota insufficient
+
+### Bug Fix Applied
+- Added `from __future__ import annotations` to `config.py` for Python 3.9 compatibility
+- Added missing `from google.auth.transport.requests import Request` import for credential refresh
+
+### Notes
+- Category ID "22" = People & Blogs (default for uploads)
+- Privacy status defaults to "private" for safety
+- Upload uses resumable MediaFileUpload for large files
