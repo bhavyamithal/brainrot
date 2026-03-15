@@ -1,0 +1,3 @@
+No analytics data available for analysis
+recommendations_count: 1
+test_passed: True

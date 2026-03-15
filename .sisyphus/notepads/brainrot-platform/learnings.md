@@ -687,3 +687,55 @@ BrainrotError (base)
 - Content type filter is placeholder (not yet implemented in fetcher)
 - Dashboard accessible via: streamlit run brainrot/dashboard/app.py
 - Uses port 8501 by default (configurable via --server.port)
+
+
+## Wave 1 Task 17: Performance Tracking Agent (2026-03-15)
+
+### Files Created
+- `brainrot/agents/__init__.py` - Package exports
+- `brainrot/agents/performance_agent.py` - Performance tracking agent implementation
+
+### Classes Implemented
+- `RecommendationType` (Enum) - Types: INCREASE_TOPIC, DECREASE_TOPIC, TEMPLATE_CHANGE, POSTING_TIME, CONTENT_LENGTH, VIRAL_OPPORTUNITY, GENERAL
+- `ContentScore` (dataclass) - Scoring result with formula: views * 0.5 + engagement * 0.3 + growth * 0.2
+- `ViralAlert` (dataclass) - Alert for viral detection (>2x average views)
+- `ContentPattern` (dataclass) - Identified performance patterns
+- `Recommendation` (dataclass) - Actionable recommendation with confidence and priority
+- `PerformanceReport` (dataclass) - Comprehensive analysis report
+- `WeeklySummary` (dataclass) - Weekly performance summary
+- `PerformanceAgent` - Main agent class with analyze(), generate_report(), detect_viral()
+
+### Scoring System
+- Views score: Normalized against max views in dataset
+- Engagement score: Normalized (likes + comments) against max engagement
+- Growth score: Direct from AnalyticsFetcher VideoGrowth.growth_score
+- Formula: views_weight * 0.5 + engagement_weight * 0.3 + growth_weight * 0.2
+- Ranks: excellent (>=0.8), good (>=0.6), average (>=0.4), below_average (<0.4)
+
+### Viral Detection
+- Threshold: 2.0x average views (VIRAL_THRESHOLD constant)
+- Creates ViralAlert with video_id, current_views, average_views, view_ratio
+- acknowledge_viral_alert() method to mark alerts as handled
+
+### Weekly Summary Features
+- Stores to cache_dir/reports/weekly_summary_YYYYMMDD.json
+- Tracks: videos_published, total_views, total_likes, top_video, best_template
+- Generates key_insights and next_week_focus recommendations
+
+### Integration Points
+- Uses AnalyticsFetcher.get_trending_videos() for performance data
+- Reads script history from cache_dir/script_history.json for pattern analysis
+- Lazy import pattern for settings (avoids Settings validation at module import)
+- Uses asyncio.run() wrapper for async AnalyticsFetcher methods
+
+### Key Design Decisions
+- No auto-adjust without human review (MVP limitation per task spec)
+- Recommendations prioritized (1=highest) and sorted
+- Pattern detection focuses on template performance and channel growth
+- Reports include supporting_data dict for transparency
+- Weekly summary auto-saved to JSON file
+
+### Notes
+- When no analytics data available, generates "Insufficient Data" recommendation
+- ContentPattern identification requires at least 2 videos per template
+- Growth score capped at [0.0, 1.0] range for scoring
