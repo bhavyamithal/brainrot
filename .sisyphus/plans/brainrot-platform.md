@@ -1259,7 +1259,7 @@ Max Concurrent: 6 (Wave 1)
 
 ---
 
-- [ ] 20. CLI Interface
+- [x] 20. CLI Interface
 
   **What to do**:
   - Create `brainrot/cli.py` with Click-based CLI

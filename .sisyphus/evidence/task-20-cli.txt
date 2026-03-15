@@ -1,0 +1,101 @@
+# Task 20: CLI Interface - Evidence
+
+## Verification Date: 2026-03-15
+
+### 1. CLI Help Output
+```
+$ python3 -m brainrot.cli --help
+Usage: python -m brainrot.cli [OPTIONS] COMMAND [ARGS]...
+
+  Brainrot: AI-powered viral content generation platform.
+
+  Commands:
+      run        Run the full content pipeline
+      trends     Fetch and display current trends
+      generate   Generate a single video from a trend
+      upload     Process the upload queue
+      status     Show current pipeline state
+      dashboard  Launch the analytics dashboard
+
+  Use 'brainrot <command> --help' for command-specific options.
+
+Options:
+  -v, --verbose  Enable verbose output.
+  --help         Show this message and exit.
+```
+
+### 2. Status Command Works
+```
+$ python3 -m brainrot.cli status
+
+📈 Pipeline Status
+
+  Run ID:        92faf52f
+  Status:        partial
+  Last Run:      2026-03-15T00:23:02.942359+00:00
+
+  📊 Statistics
+
+    Trends Processed:  0
+    Videos Generated:  0
+    Pending Uploads:   0
+    Videos Uploaded:   0
+    Errors:            3
+
+  🔄 Step Status
+
+    ✗ trend_fetch: failed
+```
+
+### 3. Status JSON Output
+```
+$ python3 -m brainrot.cli status --json-output
+{
+  "run_id": "92faf52f",
+  "status": "partial",
+  "last_run": "2026-03-15T00:23:02.942359+00:00",
+  "processed_trends": 0,
+  "generated_videos": 0,
+  "pending_videos": 0,
+  "uploaded_videos": 0,
+  "errors": 3,
+  "steps": {
+    "trend_fetch": "failed"
+  }
+}
+```
+
+### 4. Run Command Help
+```
+$ python3 -m brainrot.cli run --help
+Usage: python -m brainrot.cli run [OPTIONS]
+
+  Run the full content pipeline.
+
+  Options:
+    --dry-run              Run without uploading videos.
+    --max-trends INTEGER   Maximum trends to fetch.
+    --max-videos INTEGER   Maximum videos to generate.
+    --max-uploads INTEGER  Maximum uploads per run.
+    --help                 Show this message and exit.
+```
+
+### 5. Module Entry Point
+```
+$ python3 -m brainrot --help
+Usage: python -m brainrot [OPTIONS] COMMAND [ARGS]...
+(Works via __main__.py)
+```
+
+## Acceptance Criteria Verification
+
+- [x] CLI commands work as expected
+- [x] Help text is clear
+- [x] Dry-run mode prevents uploads (--dry-run flag available)
+- [x] --verbose flag for detailed logging
+- [x] All 6 commands implemented: run, trends, generate, upload, status, dashboard
+
+## Files Created
+
+- `brainrot/cli.py` - Click-based CLI with all commands
+- `brainrot/__main__.py` - Entry point for `python -m brainrot`

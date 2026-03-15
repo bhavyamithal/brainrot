@@ -845,3 +845,40 @@ Result: 21 passed in 16.50s
 - Video generation pipeline is resilient - catches individual trend errors and continues
 - Fixtures can be imported by other test modules via `from tests.conftest import *`
 - The `mock_settings` fixture prevents environment variable requirements during testing
+
+
+## Wave 1 Task 20: CLI Interface (2026-03-15)
+
+### Files Created
+- `brainrot/cli.py` - Click-based CLI with all commands
+- `brainrot/__main__.py` - Entry point for `python -m brainrot`
+
+### Commands Implemented
+- `brainrot run` - Full pipeline execution with --dry-run, --max-trends, --max-videos, --max-uploads
+- `brainrot trends` - Fetch and display trends with --limit, --json-output
+- `brainrot generate` - Single video generation with --trend-id, --template, --voice, --output
+- `brainrot upload` - Process upload queue with --max, --human-review, --dry-run
+- `brainrot status` - Show pipeline state with --json-output
+- `brainrot dashboard` - Launch Streamlit dashboard with --port, --no-browser
+
+### Global Options
+- `--verbose` / `-v` - Enable verbose logging (DEBUG level)
+- `--help` - Show command help
+
+### Key Design Decisions
+- Used Click's `@click.group()` for command hierarchy
+- Colored output via `click.secho()` with fg="red/green/cyan/yellow"
+- Docstrings used for --help text (Click convention with `\b` for formatting)
+- Lazy import pattern for all components (prevents Settings() at module import)
+- JSON output option for programmatic consumption
+
+### Entry Points
+- `brainrot` command (via pyproject.toml entry point)
+- `python -m brainrot` (via __main__.py)
+- `python -m brainrot.cli` (direct module execution)
+
+### Notes
+- Dry-run mode in `run` command skips upload step entirely
+- Dry-run mode in `upload` command shows queue status without uploading
+- Status command reads from cache/pipeline_state.json
+- Dashboard command spawns streamlit subprocess
