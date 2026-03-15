@@ -492,3 +492,198 @@ BrainrotError (base)
 - Gradient backgrounds currently fall back to solid color (gradient FFmpeg filter work needed)
 - Template directory resolved via `Path(__file__).parent`
 - All 4 templates verified loading with distinct styling
+
+## Wave 1 Task 14: Scheduling System (2026-03-15)
+
+### Files Created
+- `brainrot/scheduler/__init__.py` - Package exports
+- `brainrot/scheduler/scheduler.py` - Scheduler implementation with APScheduler
+
+### Dependencies Added
+- `apscheduler>=3.10.0` - Background scheduling with multiple trigger types
+
+### Classes Implemented
+- `ScheduledJob` (dataclass) - Job state tracking
+  - name, func, trigger_type, trigger_config, last_run, next_run, is_running
+- `DefaultJobConfig` (dataclass) - Default job configuration
+  - trend_fetch_hours (default: 4), video_generation_hours (default: 1), upload_times (default: 9am, 12pm, 6pm)
+- `Scheduler` - Main scheduler class
+  - `__init__(timezone)` - Timezone-aware scheduling (default: UTC)
+  - `add_job(name, func, trigger, **kwargs)` - Add interval/cron/date jobs
+  - `remove_job(name)` - Remove job by name
+  - `start()` - Start scheduler
+  - `stop(wait=True)` - Graceful shutdown (wait for running jobs)
+  - `trigger_now(name)` - Manual trigger for testing
+  - `get_jobs()` - List all jobs with state
+  - `get_next_run(name)` - Get next run time
+  - `setup_default_jobs(...)` - Configure trend_fetch, video_generation, upload jobs
+  - Context manager support (`with Scheduler() as s:`)
+
+### Trigger Types
+- `interval`: Run at fixed intervals (hours, minutes, seconds)
+- `cron`: Run at specific times (hour, minute, day_of_week, etc.)
+- `date`: Run once at specific datetime
+
+### Default Job Schedule
+- `trend_fetch`: Every 4 hours
+- `video_generation`: Every hour
+- `upload`: At 09:00, 12:00, 18:00 (configurable)
+
+### Key Design Decisions
+- Used `zoneinfo.ZoneInfo` for timezone support (Python 3.9+)
+- `DefaultJobConfig` allows customizing posting times without code changes
+- Jobs wrapped with logging and state tracking
+- Context manager ensures graceful shutdown on exit
+- APScheduler's BackgroundScheduler runs in a separate thread
+
+### Gotcha Fixed
+- APScheduler job objects don't have `next_run_time` attribute until scheduler is started
+- Solution: Use `getattr(job_state, "next_run_time", None)` instead of direct access
+
+## Wave 1 Task 13: Upload Orchestrator with Quota Management (2026-03-15)
+
+### Files Created
+- `brainrot/pipeline/__init__.py` - Package exports
+- `brainrot/pipeline/uploader.py` - Upload orchestration with queue management
+
+### Classes Implemented
+- `UploadStatus` (Enum) - Video upload states: PENDING, UPLOADING, UPLOADED, FAILED
+- `QueuedVideo` (dataclass) - Queued video metadata
+  - video_path, script, status, scheduled_at, uploaded_at, external_id, error, retry_count
+  - `to_dict()` / `from_dict()` for JSON serialization
+- `UploadQueue` - Queue persistence layer
+  - `_load()` / `_save()` for JSON file persistence
+  - `add()`, `get_pending()`, `get_failed(max_retries)`, `get_by_id()`, `update()`
+  - Properties: `length`, `pending_count`, `uploaded_today`
+- `UploadOrchestrator` - Main upload orchestration class
+  - `__init__(youtube_client, quota_manager, queue_file, max_uploads_per_day)`
+  - `queue_video(video_path, script, scheduled_at)` -> QueuedVideo
+  - `process_queue(human_review, max_uploads)` -> list[UploadResult]
+  - `_generate_metadata(script)` -> dict (title, description, tags)
+  - `_should_upload()` -> bool (checks daily limit + quota)
+  - `get_queue_status()` -> dict (full status report)
+  - Properties: `uploads_today`, `queue_length`, `pending_count`
+
+### Key Design Decisions
+- Max 5 uploads per day as safety buffer (configurable via `max_uploads_per_day`)
+- Queue persisted to `cache_dir/upload_queue.json` with full video metadata
+- Retry logic uses `@retry` decorator with 3 attempts, 2.0 backoff factor
+- Human review checkpoint: logs metadata and returns None if `human_review=True`
+- Failed videos with `retry_count < 3` are retried on next `process_queue()` call
+- Metadata generation: title from hook (max 60 chars), tags from word frequency + defaults
+
+### Lazy Import Pattern (Critical)
+- Used `_get_default_queue_file()` helper function to lazily import settings
+- This prevents `Settings()` instantiation at module import time
+- Same pattern as Task 9 (TTS) to avoid requiring environment variables for imports
+
+### Upload Flow
+1. `queue_video()` adds video to queue with PENDING status
+2. `process_queue(human_review=False)` processes pending + failed (with retries < 3)
+3. For each video: check `_should_upload()` (daily limit + quota)
+4. `_process_single()`: generate metadata, upload with retry, update status
+5. Queue persisted after each state change
+
+### Notes
+- Created `.env` file with placeholder values for testing imports
+- `youtube_client.py` still has module-level settings import (would need lazy pattern for full independence)
+- Upload metadata tags include: word frequency analysis + "shorts", "viral", "trending"
+
+## Wave 1 Task 15: Analytics Fetcher (2026-03-15)
+
+### Files Created
+- `brainrot/analytics/__init__.py` - Package exports
+- `brainrot/analytics/fetcher.py` - YouTube Analytics integration with SQLite
+
+### Dependencies Added
+- `aiosqlite>=0.19.0` - Async SQLite for analytics persistence
+
+### Classes Implemented
+- `VideoAnalytics` (dataclass) - Per-video performance metrics
+  - video_id, views, likes, comments, avg_view_duration, fetched_at
+- `ChannelAnalytics` (dataclass) - Channel-level statistics
+  - channel_id, subscriber_count, total_views, video_count, fetched_at
+- `VideoGrowth` (dataclass) - Trend detection metrics
+  - video_id, views_growth, likes_growth, growth_score, latest_analytics
+- `AnalyticsFetcher` - Main analytics class
+  - `fetch_video(video_id)` - Fetch single video analytics (sync)
+  - `fetch_channel()` - Fetch channel analytics (sync)
+  - `fetch_all_videos(video_ids)` - Fetch multiple videos (sync)
+  - `store_video_analytics(analytics)` - Store video snapshot (async)
+  - `store_channel_analytics(analytics)` - Store channel snapshot (async)
+  - `get_video_analytics(video_id, days)` - Retrieve stored analytics (async)
+  - `get_trending_videos(limit)` - Get highest growth videos (async)
+  - `export_to_csv(output_path)` - Export to CSV (async)
+  - `export_to_json(output_path)` - Export to JSON (async)
+  - `compare_periods(video_id, ...)` - Compare time periods (async)
+
+### SQLite Schema
+- `video_analytics`: id, video_id, views, likes, comments, avg_view_duration, fetched_at
+- `channel_analytics`: id, channel_id, subscriber_count, total_views, video_count, fetched_at
+- Indexes on video_id, channel_id, fetched_at for query performance
+
+### Trend Detection Algorithm
+- Analyzes snapshots from past 7 days
+- Requires at least 2 snapshots per video for growth calculation
+- Growth formula: `views_growth * 0.7 + likes_growth * 0.3`
+- Returns sorted list by growth_score (descending)
+
+### Key Design Decisions
+- Sync methods for fetching (YouTubeClient is sync)
+- Async methods for storage (aiosqlite)
+- Lazy initialization of YouTube client and database
+- Growth score prioritizes views (70%) over likes (30%)
+- Database path defaults to `cache_dir/analytics.db`
+
+### Integration Points
+- Uses `YouTubeClient.get_video_analytics()` for video metrics
+- Uses `YouTubeClient.get_channel_info()` for channel metrics
+- Lazy import of `brainrot.config.settings` to avoid triggering Settings validation
+- Lazy import of `brainrot.youtube_client.YouTubeClient` for optional dependency
+
+### Notes
+- Average view duration not available from basic YouTube API (returns 0.0)
+- Period comparison calculates percentage change between periods
+- Export includes both video and channel analytics in JSON format
+
+
+## Wave 1 Task 16: Analytics Dashboard (2026-03-15)
+
+### Files Created
+- `brainrot/dashboard/__init__.py` - Package exports with run_dashboard() helper
+- `brainrot/dashboard/app.py` - Streamlit dashboard application
+
+### Dependencies Added
+- `streamlit>=1.28.0` - Web framework for data apps
+- `pandas>=2.0.0` - Data manipulation for charts and tables
+
+### Dashboard Features
+- Dark theme with GitHub-inspired color scheme (#0d1117 background)
+- Sidebar filters: date range (st.date_input), content type (st.selectbox)
+- Key metrics cards: Total Views, Total Videos, Avg Engagement, Total Likes
+- Three tabs: Performance Trends, Top Videos, Trending
+- Charts: st.line_chart for time series, st.bar_chart for distributions
+- Tables: st.dataframe with column formatting
+
+### Key Design Decisions
+- Lazy import pattern for settings and AnalyticsFetcher (avoids Settings validation)
+- Async-to-sync bridge using ThreadPoolExecutor for Streamlit compatibility
+- DashboardStats dataclass for structured data aggregation
+- Custom CSS injection for dark theme (_apply_dark_theme function)
+- Read-only MVP (no controls, just display)
+
+### Streamlit Integration Notes
+- Streamlit doesn't natively support async - requires bridge pattern
+- st.set_page_config must be first Streamlit command
+- Custom theming via st.markdown with CSS
+- Charts accept pandas DataFrames with index for x-axis
+
+### Growth Score Integration
+- Uses AnalyticsFetcher.get_trending_videos() for growth data
+- Growth formula: views_growth * 0.7 + likes_growth * 0.3
+- Requires at least 2 snapshots per video for growth calculation
+
+### Notes
+- Content type filter is placeholder (not yet implemented in fetcher)
+- Dashboard accessible via: streamlit run brainrot/dashboard/app.py
+- Uses port 8501 by default (configurable via --server.port)
