@@ -916,3 +916,47 @@ Added docstring to `check_ffmpeg_available()` in video/assembly.py
 ### Notes
 - System has Python 3.9.6, but package requires 3.10+ (documented in README)
 - Installation correctly enforces Python version requirement
+
+
+## Wave 1 Task 23: Production Deployment (2026-03-15)
+
+### Files Created
+- `Dockerfile` - Multi-stage build for production deployment
+- `docker-compose.yml` - Service orchestration configuration
+- `scripts/deploy.sh` - Deployment automation script
+
+### Docker Configuration
+- Base image: python:3.11-slim
+- Multi-stage build: builder (compile) + production (runtime)
+- FFmpeg installed via apt-get for video processing
+- Non-root user 'appuser' for security
+- Health check using FFmpeg availability verification
+
+### Services
+- `scheduler`: Runs `brainrot run --verbose` with restart policy
+- `dashboard`: Runs Streamlit on port 8501, depends on scheduler health
+- Both services share volume mounts: cache, credentials, output, logs
+
+### Health Checks
+- scheduler: Python command checking FFmpeg availability (60s interval)
+- dashboard: HTTP GET to `/_stcore/health` endpoint (30s interval)
+- Both have 3 retries with 10s timeout
+
+### Deploy Script Features
+- Commands: deploy, start, stop, restart, status, logs, build
+- Dependency checking (Docker, Docker Compose)
+- Environment file handling (copies .env.example if needed)
+- Colored output for status messages
+- Works with both `docker-compose` and `docker compose` syntax
+
+### Key Design Decisions
+- Volume mounts use relative paths for portability
+- Log rotation configured (10MB max, 3 files) to prevent disk issues
+- Dashboard depends on scheduler health (not just startup)
+- Named volumes for potential persistence requirements
+- Restart policy `unless-stopped` for automatic recovery
+
+### Notes
+- Docker not installed on development system; validation via structure review
+- Dashboard uses Streamlit's built-in health endpoint
+- Scheduler runs in foreground (APScheduler handles scheduling internally)

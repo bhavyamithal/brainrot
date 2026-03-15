@@ -1,0 +1,64 @@
+Task 23: Production Deployment - Evidence
+==========================================
+
+Date: 2026-03-15
+
+## Files Created
+
+1. Dockerfile
+   - Multi-stage build (builder + production)
+   - Python 3.11-slim base image
+   - FFmpeg installed for video processing
+   - Non-root user for security
+   - Health check included
+
+2. docker-compose.yml
+   - scheduler service: runs `brainrot run --verbose`
+   - dashboard service: runs Streamlit on port 8501
+   - Volume mounts: cache, credentials, output, logs
+   - Health checks for both services
+   - Restart policy: unless-stopped
+   - Logging configured with rotation (10m max, 3 files)
+
+3. scripts/deploy.sh
+   - Executable deployment script
+   - Commands: deploy, start, stop, restart, status, logs, build
+   - Dependency checks (Docker, Docker Compose)
+   - Environment file handling
+   - Directory creation
+
+4. README.md
+   - Added comprehensive Deployment section
+   - Docker deployment instructions
+   - Volume mount documentation
+   - Health check information
+   - Monitoring instructions
+
+## Verification
+
+docker-compose.yml structure validated:
+- services: scheduler, dashboard
+- networks: brainrot-network (bridge)
+- volumes: cache-data, output-data
+- Health checks configured for both services
+- Dashboard depends on scheduler health
+
+## Services Configuration
+
+### scheduler
+- Command: `brainrot run --verbose`
+- Health check: FFmpeg availability (60s interval)
+- Restarts on failure
+
+### dashboard
+- Command: `brainrot dashboard --no-browser --port 8501`
+- Port: 8501 (host) -> 8501 (container)
+- Health check: HTTP endpoint (30s interval)
+- Depends on scheduler being healthy
+
+## Notes
+
+- Docker not installed on this system; validation performed via structure review
+- Multi-stage Dockerfile reduces final image size
+- Non-root user improves security posture
+- Log rotation prevents disk space issues

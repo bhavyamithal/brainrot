@@ -1,0 +1,77 @@
+services:
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: brainrot-scheduler
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - BRAINROT_CACHE_DIR=/app/cache
+      - BRAINROT_OUTPUT_DIR=/app/output
+      - BRAINROT_LOG_DIR=/app/logs
+    volumes:
+      - ./cache:/app/cache
+      - ./credentials:/app/credentials
+      - ./output:/app/output
+      - ./logs:/app/logs
+    command: ["run", "--verbose"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "from brainrot.video.assembly import check_ffmpeg_available; check_ffmpeg_available()"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - brainrot-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: brainrot-dashboard
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - BRAINROT_CACHE_DIR=/app/cache
+      - BRAINROT_OUTPUT_DIR=/app/output
+      - BRAINROT_LOG_DIR=/app/logs
+    volumes:
+      - ./cache:/app/cache
+      - ./credentials:/app/credentials
+      - ./output:/app/output
+      - ./logs:/app/logs
+    ports:
+      - "8501:8501"
+    command: ["dashboard", "--no-browser", "--port", "8501"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - brainrot-network
+    depends_on:
+      scheduler:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  brainrot-network:
+    driver: bridge
+
+volumes:
+  cache-data:
+  output-data:

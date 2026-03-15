@@ -250,6 +250,65 @@ mypy brainrot/
 ruff check brainrot/
 ```
 
+## Deployment
+
+### Docker Deployment
+
+The platform can be deployed using Docker Compose for VPS or local server environments.
+
+#### Prerequisites
+- Docker and Docker Compose installed
+- API credentials configured in `.env`
+
+#### Quick Deploy
+```bash
+./scripts/deploy.sh deploy
+```
+
+#### Available Commands
+```bash
+./scripts/deploy.sh deploy    # Build and start all services
+./scripts/deploy.sh start     # Start existing services
+./scripts/deploy.sh stop      # Stop all services
+./scripts/deploy.sh restart   # Restart all services
+./scripts/deploy.sh status    # Show service status
+./scripts/deploy.sh logs      # View logs (add service name to filter)
+./scripts/deploy.sh build     # Build containers only
+```
+
+#### Services
+| Service | Description | Port |
+|---------|-------------|------|
+| `scheduler` | Runs content pipeline on schedule | - |
+| `dashboard` | Streamlit analytics interface | 8501 |
+
+#### Volume Mounts
+| Host Path | Container Path | Purpose |
+|-----------|----------------|---------|
+| `./cache` | `/app/cache` | Analytics DB, pipeline state, audio cache |
+| `./credentials` | `/app/credentials` | YouTube OAuth tokens |
+| `./output` | `/app/output` | Generated videos |
+| `./logs` | `/app/logs` | Application logs |
+
+#### Health Checks
+Both services include health checks:
+- `scheduler`: FFmpeg availability check every 60s
+- `dashboard`: HTTP health endpoint check every 30s
+
+#### Manual Docker Commands
+```bash
+docker-compose up -d          # Start in background
+docker-compose down           # Stop all services
+docker-compose logs -f        # Follow all logs
+docker-compose ps             # Show status
+docker-compose config         # Validate configuration
+```
+
+#### Monitoring
+- Logs: `docker-compose logs -f scheduler`
+- Container status: `docker-compose ps`
+- Dashboard: http://localhost:8501
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.

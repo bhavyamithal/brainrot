@@ -1421,7 +1421,7 @@ Max Concurrent: 6 (Wave 1)
 
 ---
 
-- [ ] 23. Production Deployment
+- [x] 23. Production Deployment
 
   **What to do**:
   - Create `docker-compose.yml` for deployment
