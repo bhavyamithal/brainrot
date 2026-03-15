@@ -1,0 +1,3 @@
+=== Task 2: Config Load Check ===
+Config loaded successfully
+Exit code: 0

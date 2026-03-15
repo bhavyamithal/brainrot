@@ -1,0 +1,4 @@
+=== Task 4: Logging Check ===
+2026-03-15 06:21:28,792 - root - INFO - [-] - test message
+Logging OK
+Exit code: 0

@@ -1,0 +1,13 @@
+=== Task 3: Types Validate Check ===
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/Users/bhavya.mithal/Library/Python/3.9/lib/python/site-packages/pydantic/main.py", line 250, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+pydantic_core._pydantic_core.ValidationError: 2 validation errors for Trend
+id
+  Field required [type=missing, input_value={'title': 'test', 'source... 'reddit', 'score': 100}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+url
+  Field required [type=missing, input_value={'title': 'test', 'source... 'reddit', 'score': 100}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+Exit code: 1

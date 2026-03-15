@@ -1,0 +1,48 @@
+# Brainrot Channel Configuration
+# Copy this file to config/channel.yaml and fill in your details
+
+channel:
+  name: "Your Channel Name"
+  description: "AI-generated content about trending tech topics"
+  default_language: "en-US"
+  default_category: "28"  # Science & Technology
+  
+credentials:
+  youtube:
+    # Path to OAuth client secrets JSON (from Google Cloud Console)
+    client_secrets: "credentials/youtube_client_secrets.json"
+    # Path to stored credentials (auto-generated after first auth)
+    credentials_file: "credentials/youtube_credentials.json"
+  
+  reddit:
+    # Reddit app credentials (from reddit.com/prefs/apps)
+    client_id: "YOUR_REDDIT_CLIENT_ID"
+    client_secret: "YOUR_REDDIT_CLIENT_SECRET"
+    user_agent: "brainrot/0.1.0"
+
+content:
+  # Content generation settings
+  default_template: "tech_news"
+  default_voice: "default"
+  
+  # Subreddits to monitor for trends
+  subreddits:
+    - "technology"
+    - "programming"
+    - "artificial"
+    - "MachineLearning"
+    - "datascience"
+  
+  # Posting schedule (24-hour format, UTC)
+  upload_times:
+    - "09:00"
+    - "12:00"
+    - "18:00"
+  
+  # Limits
+  max_trends_per_day: 10
+  max_videos_per_day: 3
+  max_uploads_per_day: 2
+
+# This file is used by the CLI for channel-specific configuration
+# Run: brainrot run --channel config/channel.yaml

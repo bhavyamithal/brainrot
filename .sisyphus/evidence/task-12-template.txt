@@ -1,0 +1,3 @@
+=== Task 12: Templates Check ===
+Templates: ['data_story', 'explainer', 'listicle', 'tech_news']
+Exit code: 0

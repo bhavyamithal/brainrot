@@ -1,0 +1,4 @@
+=== Task 11: Video Assembly Check ===
+VideoBuilder: OK
+ConcatDemuxer: OK
+Exit code: 0
