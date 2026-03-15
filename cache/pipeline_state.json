@@ -1,0 +1,37 @@
+{
+  "last_run": "2026-03-15T00:23:02.942359+00:00",
+  "run_id": "92faf52f",
+  "status": "partial",
+  "steps": {
+    "trend_fetch": {
+      "name": "trend_fetch",
+      "status": "failed",
+      "started_at": "2026-03-15T00:23:02.942776+00:00",
+      "completed_at": "2026-03-15T00:23:05.298036+00:00",
+      "items_processed": 0,
+      "error": "No trends fetched from any source (details: {'errors': ['RedditTrendSource: No trends fetched from any subreddit', 'GoogleTrendsSource: Failed to fetch Google Trends']})",
+      "details": {}
+    }
+  },
+  "processed_trends": [],
+  "generated_videos": [],
+  "pending_videos": [],
+  "uploaded_videos": [],
+  "errors": [
+    {
+      "step": "trend_fetch",
+      "error": "No trends fetched from any source (details: {'errors': ['RedditTrendSource: No trends fetched from any subreddit', 'GoogleTrendsSource: Failed to fetch Google Trends']})",
+      "timestamp": "2026-03-15T00:22:36.869439+00:00"
+    },
+    {
+      "step": "trend_fetch",
+      "error": "No trends fetched from any source (details: {'errors': ['RedditTrendSource: No trends fetched from any subreddit', 'GoogleTrendsSource: Failed to fetch Google Trends']})",
+      "timestamp": "2026-03-15T00:22:47.726723+00:00"
+    },
+    {
+      "step": "trend_fetch",
+      "error": "No trends fetched from any source (details: {'errors': ['RedditTrendSource: No trends fetched from any subreddit', 'GoogleTrendsSource: Failed to fetch Google Trends']})",
+      "timestamp": "2026-03-15T00:23:05.298044+00:00"
+    }
+  ]
+}

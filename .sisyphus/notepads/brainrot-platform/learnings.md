@@ -739,3 +739,59 @@ BrainrotError (base)
 - When no analytics data available, generates "Insufficient Data" recommendation
 - ContentPattern identification requires at least 2 videos per template
 - Growth score capped at [0.0, 1.0] range for scoring
+
+## Wave 1 Task 18: Main Orchestration Pipeline (2026-03-15)
+
+### Files Created
+- `brainrot/pipeline/orchestrator.py` - Main orchestration pipeline with state management
+
+### Classes Implemented
+- `PipelineStatus` (Enum) - Pipeline execution states: PENDING, RUNNING, COMPLETED, PARTIAL, FAILED
+- `StepStatus` (Enum) - Step-level states: PENDING, RUNNING, COMPLETED, SKIPPED, FAILED
+- `StepResult` (dataclass) - Individual step execution tracking with timing
+- `PipelineState` (dataclass) - Full pipeline state with persistence to JSON
+- `PipelineResult` (dataclass) - Execution result with status, completed steps, error info
+- `PipelineConfig` (dataclass) - Configuration for pipeline behavior
+- `Pipeline` - Main orchestration class coordinating all components
+
+### Methods Implemented
+- `run_daily()` - Full pipeline execution with checkpoint persistence
+- `run_trend_fetch()` - Fetch trends from configured sources
+- `run_video_gen()` - Generate videos from trends (script → audio → video)
+- `run_upload()` - Upload queued videos with quota management
+- `run_analytics()` - Fetch and analyze performance data
+- `resume()` - Resume from failure point (skip completed steps)
+- `get_status()` - Get current pipeline status
+- `reset_state()` - Clear all pipeline state
+
+### Component Integration Order
+1. TrendAggregator → fetch trends
+2. ScriptGenerator → generate scripts from trends
+3. TTSClient → synthesize audio
+4. AssetManager → get background footage
+5. VideoBuilder → assemble video with TemplateRenderer
+6. UploadOrchestrator → upload to YouTube
+7. AnalyticsFetcher → fetch performance data
+8. PerformanceAgent → analyze and recommend
+
+### State Persistence
+- State persisted to `cache_dir/pipeline_state.json`
+- Tracks: last_run, run_id, status, steps, processed_trends, generated_videos, pending_videos, uploaded_videos, errors
+- Each step saves state after completion for resume capability
+
+### Error Handling & Recovery
+- On step failure: save state, log error, return PARTIAL result
+- On resume: load state, skip completed steps, continue from failure
+- Analytics failure is non-critical (logged but doesn't stop pipeline)
+
+### Key Design Decisions
+- Lazy import pattern for all components (avoids Settings() at module import)
+- State saved after each step for granular recovery
+- Sequential uploads (no parallel) to avoid quota tracking issues
+- Configurable limits: max_trends_per_run, max_videos_per_run, max_uploads_per_run
+- Template and voice configurable via PipelineConfig
+
+### Notes
+- External APIs (Reddit, Google Trends) require valid credentials
+- Pipeline returns "partial" status when external APIs fail (graceful degradation)
+- Video generation includes fallback to solid color background if asset search fails
