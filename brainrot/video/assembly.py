@@ -345,4 +345,9 @@ class VideoBuilder:
 
 
 def check_ffmpeg_available() -> bool:
+    """Check if FFmpeg is available on the system.
+
+    Returns:
+        True if ffmpeg is found in PATH, False otherwise.
+    """
     return shutil.which("ffmpeg") is not None

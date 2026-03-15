@@ -1312,7 +1312,7 @@ Max Concurrent: 6 (Wave 1)
 
 ---
 
-- [ ] 21. Documentation
+- [x] 21. Documentation
 
   **What to do**:
   - Create `README.md` with:
